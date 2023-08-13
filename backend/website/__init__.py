@@ -12,12 +12,12 @@ DB_NAME = "project.db"
 
 ACCESS_EXPIRES = timedelta(days=30)
 
-# # Setup our redis connection for storing the blocklisted tokens. You will probably
-# # want your redis instance configured to persist data to disk, so that a restart
-# # does not cause your application to forget that a JWT was revoked.
-# jwt_redis_blocklist = redis.StrictRedis(
-#     host="localhost", port=6379, db=0, decode_responses=True
-# )
+# Setup our redis connection for storing the blocklisted tokens. You will probably
+# want your redis instance configured to persist data to disk, so that a restart
+# does not cause your application to forget that a JWT was revoked.
+jwt_redis_blocklist = redis.StrictRedis(
+    host="localhost", port=6379, db=0, decode_responses=True
+)
 
 app = Flask(__name__)
 app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
@@ -30,11 +30,11 @@ app.config["JWT_ACCESS_TOKEN_EXPIRES"] = ACCESS_EXPIRES
 jwt = JWTManager(app)
 
 # Callback function to check if a JWT exists in the redis blocklist
-# @jwt.token_in_blocklist_loader
-# def check_if_token_is_revoked(jwt_header, jwt_payload: dict):
-#     jti = jwt_payload["jti"]
-#     token_in_redis = jwt_redis_blocklist.get(jti)
-#     return token_in_redis is not None
+@jwt.token_in_blocklist_loader
+def check_if_token_is_revoked(jwt_header, jwt_payload: dict):
+    jti = jwt_payload["jti"]
+    token_in_redis = jwt_redis_blocklist.get(jti)
+    return token_in_redis is not None
 
 db.init_app(app)
 
@@ -100,6 +100,10 @@ def user_lookup_callback(_jwt_header, jwt_data):
 login_manager = LoginManager()
 login_manager.login_view = "auth.login"
 login_manager.init_app(app)
+
+# initialize celery
+import tasks
+from tasks.tasks import *
 
 @login_manager.user_loader
 def load_user(id):
