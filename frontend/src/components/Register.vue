@@ -1,7 +1,10 @@
 <template>
   <main class="form-register w-50 m-auto">
     <form @submit.prevent="handleFormRegister">
-
+      <div v-if="errStatus">
+        <br />
+        <p class="alert alert-danger">{{ errormsg }}</p>
+      </div>
       <h1 class="h3 mb-3 fw-normal">Register</h1>
 
       <div class="form-floating">
@@ -77,7 +80,7 @@ export default {
   validations: {
     name: { required, name },
     email: { required, email },
-    password: { required, minLength: minLength(6) },
+    password: { required, minLength: minLength(5) },
     repeatPassword: { sameAsPassword: sameAs("password") },
   },
   methods: {
@@ -102,9 +105,9 @@ export default {
           }),
         })
           .then((response) => {
-            if (!response.ok) {
-              alert("Uh oh! Something went wrong in our backend.");
-            }
+            // if (!response.ok) {
+            //   alert("Uh oh! Something went wrong in our backend.");
+            // }
             return response.json();
           })
           .then((data) => {
@@ -113,7 +116,7 @@ export default {
               alert(data.success + " Please login to continue")
             } else {
               this.errStatus = true;
-              this.errormsg = data.msg;
+              this.errormsg = data.error;
               this.password = null;
               this.email = null;
             }
