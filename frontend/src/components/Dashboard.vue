@@ -14,6 +14,7 @@
                   <a class="btn btn-sm btn-warning mx-1">Edit Venue</a>
                 </router-link>
                 <button v-if="isAdmin" class="btn btn-sm btn-danger" @click="deleteVenue(venue.venue_id)">Delete Venue</button>
+                <div><button @click="downloadCSV">Download CSV</button></div>
               </div>
             </div>
             <div class="row">
@@ -57,6 +58,7 @@
 
 <script>
 // import List from "./List.vue";
+import axios from 'axios';
 export default {
   name: "Dashboard",
   components: {
@@ -169,6 +171,27 @@ export default {
       .catch((err) => {
         console.log(err);
       });
+    },
+    async downloadCSV() {
+    try {
+      // Trigger the Celery task via Flask API
+      const response = await axios.post('/generate_csv');
+      const csvContent = response.data.csv_content;
+
+      // Create Blob and initiate download
+      const blob = new Blob([csvContent], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'theater_data.csv');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error('Error:', error);
+    }
+    
   },
 };
 </script>

@@ -38,3 +38,25 @@ def send_reminder_email(email):
 
     message = Message(subject=subject, recipients=[email], body=body)
     mail.send(message)
+
+
+from celery import Celery
+import sqlite3
+import csv
+
+@celery_app.task
+def generate_csv_task():
+    conn = sqlite3.connect('project.db')
+    cursor = conn.cursor()
+
+    cursor.execute('SELECT show.* FROM show,venue where show.venue_id = venue.id')
+    data = cursor.fetchall()
+
+    conn.close()
+
+    csv_data = []
+    csv_data.append([description[0] for description in cursor.description])
+    csv_data.extend(data)
+
+    csv_content = '\n'.join([','.join(map(str, row)) for row in csv_data])
+    return csv_content
