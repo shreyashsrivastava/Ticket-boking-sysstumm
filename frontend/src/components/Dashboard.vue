@@ -6,14 +6,15 @@
           <div v-for="venue in venuesData" :key="venue.venue_id" class="card-body">
             <div class="d-flex justify-content-between align-items-center mb-2">
               <h5 class="card-title" style="text-align: left;">{{ venue.venue_name }}</h5>
-              <router-link :to="'/addShow/' + venue.venue_id" v-if="isAdmin">
-                <a class="btn btn-sm btn-primary">Add Show</a>
-              </router-link>
-              <router-link :to="'/editVenue/' + venue.venue_id" v-if="isAdmin">
-                <a class="btn btn-sm btn-warning">Edit Venue</a>
-              </router-link>
-              <button v-if="isAdmin" class="btn btn-sm btn-danger" @click="deleteVenue(venue.venue_id)">Delete
-                Venue</button>
+              <div class="d-flex align-items-center">
+                <router-link :to="'/addShow/' + venue.venue_id" v-if="isAdmin">
+                  <a class="btn btn-sm btn-primary">Add Show</a>
+                </router-link>
+                <router-link :to="'/editVenue/' + venue.venue_id" v-if="isAdmin">
+                  <a class="btn btn-sm btn-warning mx-1">Edit Venue</a>
+                </router-link>
+                <button v-if="isAdmin" class="btn btn-sm btn-danger" @click="deleteVenue(venue.venue_id)">Delete Venue</button>
+              </div>
             </div>
             <div class="row">
               <template v-if="venue.shows.length > 0">
@@ -23,16 +24,18 @@
                       <h5 class="card-title">{{ show.name }}</h5>
                       <p class="card-text">Date: {{ show.date }}</p>
                       <p>Rating: {{ show.rating }}</p>
-                      <router-link :to="'/booking/' + show.id" v-if="show.tickets_available > 0">
-                        <a class="btn btn-primary">Book Ticket</a>
-                      </router-link>
-                      <a v-else class="btn btn-secondary" disabled>Houseful</a>
-                      <p></p>
-                      <button v-if="isAdmin" class="btn btn-sm btn-danger" @click="deleteShow(show.id)">Delete
-                        Show</button> &nbsp;
-                      <router-link :to="'/editShow/' + show.id" v-if="isAdmin">
-                        <a class="btn btn-sm btn-warning">Edit Show</a>
-                      </router-link>
+                      <div class="d-flex align-items-center">
+                        <router-link :to="'/booking/' + show.id" v-if="show.tickets_available > 0">
+                          <a class="btn btn-primary">Book Ticket</a>
+                        </router-link>
+                        <a v-else class="btn btn-secondary" disabled>Houseful</a>
+                      </div>
+                      <div class="d-flex align-items-center mt-2">
+                        <button v-if="isAdmin" class="btn btn-sm btn-danger" @click="deleteShow(show.id)">Delete Show</button>
+                        <router-link :to="'/editShow/' + show.id" v-if="isAdmin">
+                          <a class="btn btn-sm btn-warning mx-1">Edit Show</a>
+                        </router-link>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -50,6 +53,7 @@
     </div>
   </div>
 </template>
+
 
 <script>
 // import List from "./List.vue";
