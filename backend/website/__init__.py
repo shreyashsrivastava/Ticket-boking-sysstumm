@@ -113,10 +113,6 @@ login_manager = LoginManager()
 login_manager.login_view = "auth.login"
 login_manager.init_app(app)
 
-# initialize celery
-import tasks
-from tasks.tasks import *
-
 @login_manager.user_loader
 def load_user(id):
     return User.query.get(int(id))
@@ -125,6 +121,10 @@ def create_database(app):
     if not path.exists(DB_NAME):
         db.create_all(app=app)
         print("DB Created")
+
+# initialize celery
+import tasks
+from tasks.tasks import *
 
 def create_app():
     return app
