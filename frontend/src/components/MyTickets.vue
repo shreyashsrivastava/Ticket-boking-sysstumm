@@ -101,6 +101,8 @@ export default {
   },
 };
 </script>
+
+<style scoped>
 .booking-details {
   display: flex;
   justify-content: space-between;
@@ -117,5 +119,5 @@ export default {
 .right {
   text-align: right;
 }
-<style scoped></style>
+</style>
   
