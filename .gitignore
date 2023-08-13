@@ -3,3 +3,7 @@ backend-src.7z
 Project Documentation.pdf
 __pycache__
 node_modules/
+backend/celerybeat-schedule.bak
+backend/celerybeat-schedule.dat
+backend/celerybeat-schedule.dir
+backend/instance/project.db

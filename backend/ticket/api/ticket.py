@@ -8,6 +8,10 @@ from sqlalchemy.exc import IntegrityError
 from flask_jwt_extended import current_user
 from flask import Blueprint, jsonify
 from website import db
+from celery.result import AsyncResult
+from tasks import celery_app
+from accounts.tasks import send_daily_reminders
+
 
 ticket_api = Blueprint("ticket_api", __name__, url_prefix="/ticket")
 
@@ -97,3 +101,17 @@ def deleteTicket(ticket_id):
     db.session.delete(ticket)
     db.session.commit()
     return jsonify({"success": "Ticket deleted"}), 200
+
+@ticket_api.route("/api/tasks", methods=["GET"])
+def testTasks():
+    result = send_daily_reminders.delay()
+    return f"Task started with ID: {result.id}"
+
+@ticket_api.route('/task_result/<task_id>')
+def task_result(task_id):
+    result = AsyncResult(task_id, app=celery_app)
+    
+    if result.ready():
+        return f"Task ID: {task_id}, Result: {result.result}, status: {result.state}"
+    else:
+        return f"Task ID: {task_id}, Result: Task not yet completed, status: {result.state}"

@@ -6,6 +6,7 @@ from flask_login import LoginManager
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
 from datetime import timedelta
+from flask_mail import Mail
 
 db = SQLAlchemy()
 DB_NAME = "project.db"
@@ -37,6 +38,17 @@ def check_if_token_is_revoked(jwt_header, jwt_payload: dict):
     return token_in_redis is not None
 
 db.init_app(app)
+
+mail = Mail(app) # instantiate the mail class
+   
+# configuration of mail
+app.config['MAIL_SERVER']='smtp.gmail.com'
+app.config['MAIL_PORT'] = 465
+app.config['MAIL_USERNAME'] = 'yourId@gmail.com'
+app.config['MAIL_PASSWORD'] = '*****'
+app.config['MAIL_USE_TLS'] = False
+app.config['MAIL_USE_SSL'] = True
+mail = Mail(app)
 
 @app.errorhandler(422)
 @app.errorhandler(400)
