@@ -56,8 +56,14 @@ def getTickets():
     for ticket in resp:
         show = Show.query.filter_by(id=ticket['show']).first()
         venue = Venue.query.filter_by(id=show.venue_id).first()
-        ticket['show_name'] = show.name
-        ticket['venue_name'] = venue.name
+        if (show is not None):
+            ticket['show_name'] = show.name
+        else:
+            ticket['show_name'] = "'Show deleted'"
+        if (venue is not None):
+            ticket['venue_name'] = venue.name
+        else:
+            ticket['venue_name'] = "'Venue deleted'"
         final_resp.append(ticket)
     return jsonify(final_resp), 200
 

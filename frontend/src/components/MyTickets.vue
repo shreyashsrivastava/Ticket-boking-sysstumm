@@ -11,10 +11,12 @@
                 <div class="col-md-12">
                   <div class="card">
                     <div class="card-body">
-                      <p><strong>Show:</strong> {{ booking.show_name }}</p>
-                      <p><strong>Venue:</strong> {{ booking.venue_name }}</p>
-                      <p><strong>Date:</strong> {{ booking.date }}</p>
-                      <p><strong>Quantity:</strong> {{ booking.quantity }}</p>
+                      <p class="booking-details">
+                        <span class="left"><strong>Show:</strong> {{ booking.show_name }}</span>
+                        <span class="center"><strong>Venue:</strong> {{ booking.venue_name }}</span>
+                        <span class="right"><strong>Date:</strong> {{ booking.date }}</span>
+                        <span class="right"><strong>Quantity:</strong> {{ booking.quantity }}</span>
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -26,6 +28,7 @@
     </div>
   </div>
 </template>
+
   
 <script>
 import NavBar from "@/components/NavBar.vue";
@@ -98,7 +101,21 @@ export default {
   },
 };
 </script>
-  
-  <!-- Add "scoped" attribute to limit CSS to this component only -->
+.booking-details {
+  display: flex;
+  justify-content: space-between;
+}
+
+.left {
+  text-align: left;
+}
+
+.center {
+  text-align: center;
+}
+
+.right {
+  text-align: right;
+}
 <style scoped></style>
   
