@@ -1,0 +1,27 @@
+{% extends "base.html" %} {% block title %}Login{% endblock %} {% block content%}
+
+<div class="container mt-4">
+
+  <a href="http://localhost:5000/venue/create" class="btn btn-primary bton-outline-primary mb-4 mt-4">Add Venue</a>
+
+  <div class="row">
+    {% for venue in venues %}
+    <div class="col-4">
+      <div class="card" style="width: 18rem;">
+        <div class="card-body">
+          <h5 class="card-title">{{venue.name}}</h5>
+          <p class="card-text">Location : {{venue.place}}</p>
+          <p class="card-text">Capacity : {{venue.capacity}}</p>
+          <p class="card-text">No. of Screens : {{venue.screens}}</p>
+          <span>
+            <a href="/venue/delete/{{venue.id}}" class="btn btn-danger">Delete</a>
+            <!-- <a href="#" class="btn btn-warning">Edit</a> -->
+          </span>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+{% endblock %}

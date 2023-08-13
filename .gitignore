@@ -1,0 +1,5 @@
+venv/
+backend-src.7z
+Project Documentation.pdf
+__pycache__
+node_modules/

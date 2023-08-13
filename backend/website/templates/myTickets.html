@@ -1,0 +1,18 @@
+{% extends "base.html" %} {% block title %}Login{% endblock %}
+{% block content%}
+<div class="container mt-2">
+    <div class="row">
+        {% for ticket in tickets %}
+        <div class="col-4 mt-4">
+            <div class="card" style="width: 18rem;">
+                <div class="card-body">
+                    <h5 class="card-title">Ticket ID: #{{ticket.id}}</h5>
+                    <p class="card-text">Quantity: {{ticket.quantity}}</p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}

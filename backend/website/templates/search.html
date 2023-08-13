@@ -1,0 +1,49 @@
+{% extends "base.html" %} {% block title %}Login{% endblock %} {% block content%}
+
+<div class="container mt-4">
+    {% if shows %}
+    <h4>Related shows for search</h4>
+    <hr>
+    <div class="row">
+        {% for show in shows %}
+        <div class="col-4">
+            <div class="card" style="width: 18rem;">
+                <div class="card-body">
+                    <h5 class="card-title">{{show.name}}</h5>
+                    <p class="card-text">Rating : {{show.rating}}</p>
+                    <p class="card-text">Tags : {{show.tag}}</p>
+                    <p class="card-text">Price : {{show.ticket_price}}</p>
+                    <p class="card-text">Venue : {{show.show_venue.name}}</p>
+                    <p class="card-text">Date : {{show.date}}</p>
+                    <a href="/ticket/show/{{show.id}}" class="btn btn-primary">Book Ticket</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    <hr>
+    {% if venues %}
+    <h4>Related venues for search</h4>
+    <hr>
+    <div class="row">
+        {% for venue in venues %}
+        <div class="col-4">
+            <div class="card" style="width: 18rem;">
+                <div class="card-body">
+                    <h5 class="card-title">{{venue.name}}</h5>
+                    <p class="card-text">Location : {{venue.place}}</p>
+                    <p class="card-text">Capacity : {{venue.capacity}}</p>
+                    <p class="card-text">No. of Screens : {{venue.screens}}</p>
+                    <span>
+                        <a href="/venue/delete/{{venue.id}}" class="btn btn-danger">Delete</a>
+                        <!-- <a href="#" class="btn btn-warning">Edit</a> -->
+                    </span>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
