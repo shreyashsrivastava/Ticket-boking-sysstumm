@@ -60,3 +60,11 @@ def deleteVenue(venue_id):
     db.session.delete(venue)
     db.session.commit()
     return jsonify({"success": "Venue deleted"}), 200   
+
+@venue_api.route("/api/generate_csv/<int:venue_id>", methods=["POST"])
+@jwt_required()
+def downloadCSV(venue_id):
+    from tasks.tasks import generate_csv_task
+    
+    generate_csv_task.delay(venue_id)
+    return jsonify({"success": "Request submitted, you will receive an email shortly!"}), 200

@@ -16,9 +16,12 @@ def send_daily_reminders():
     if current_time >= evening_time:
         users_to_remind = get_users_to_remind()
 
+        subject = "Daily Reminder"
+        body = "Hello! It looks like you haven't visited or booked anything yet. Please consider visiting or booking something today."
+    
         # Send reminders to the users
         for user in users_to_remind:
-            send_reminder_email(user.email)
+            send_email(user.email, subject, body)
 
 def get_users_to_remind():
     from accounts.models import User
@@ -32,24 +35,40 @@ def get_users_to_remind():
                 users.remove(user)
     return users
 
-def send_reminder_email(email):
-    subject = "Daily Reminder"
-    body = "Hello! It looks like you haven't visited or booked anything yet. Please consider visiting or booking something today."
-
+def send_email(email, subject, body, attachment_file_path=None):
     message = Message(subject=subject, recipients=[email], body=body)
+    if attachment_file_path:
+        # Attach the CSV file to the email
+        with open(attachment_file_path, 'rb') as csv_file:
+            message.attach(
+                filename=f'theater_data.csv',
+                content_type='text/csv',
+                data=csv_file.read()
+            )
     mail.send(message)
 
 
-from celery import Celery
-import sqlite3
-import csv
-
 @celery_app.task
-def generate_csv_task():
+def generate_csv_task(venue_id):
+    csv_content = generate_csv(venue_id)
+    with open('theater_data.csv', 'w') as csv_file:
+        csv_file.write(csv_content)
+    admin_users = get_admin_users()
+    for user in admin_users:
+        send_email(user.email, "Theater Data", "Here is the data for the theater.", attachment_file_path="theater_data.csv")
+        
+def get_admin_users():
+    from accounts.models import User
+    
+    return User.query.filter_by(is_admin=True).all()
+    
+def generate_csv(venue_id):
+    import sqlite3
+        
     conn = sqlite3.connect('project.db')
     cursor = conn.cursor()
 
-    cursor.execute('SELECT show.* FROM show,venue where show.venue_id = venue.id')
+    cursor.execute(f'SELECT show.* FROM show where show.venue_id = {venue_id}')
     data = cursor.fetchall()
 
     conn.close()

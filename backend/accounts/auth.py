@@ -4,6 +4,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from .models import User
 from datetime import datetime
 from website import db
+from flask_mail import Message
 
 auth = Blueprint("auth", __name__, url_prefix="/auth")
 

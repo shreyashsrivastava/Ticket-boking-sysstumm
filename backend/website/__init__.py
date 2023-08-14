@@ -39,15 +39,14 @@ def check_if_token_is_revoked(jwt_header, jwt_payload: dict):
 
 db.init_app(app)
 
-mail = Mail(app) # instantiate the mail class
-   
 # configuration of mail
 app.config['MAIL_SERVER']='smtp.gmail.com'
-app.config['MAIL_PORT'] = 465
-app.config['MAIL_USERNAME'] = 'yourId@gmail.com'
-app.config['MAIL_PASSWORD'] = '*****'
-app.config['MAIL_USE_TLS'] = False
-app.config['MAIL_USE_SSL'] = True
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USERNAME'] = '21f1006542@ds.study.iitm.ac.in'
+app.config['MAIL_DEFAULT_SENDER'] = '21f1006542@ds.study.iitm.ac.in'
+app.config['MAIL_PASSWORD'] = 'urfmnlhmxoygmwhf'
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USE_SSL'] = False
 mail = Mail(app)
 
 @app.errorhandler(422)
@@ -61,38 +60,10 @@ def handle_error(err):
     else:
         return jsonify({"errors": messages}), err.code
 
-from .views import views
-from accounts.auth import auth
-from accounts.api.auth import auth_api
-from shows.views import show
-from shows.api.shows import show_api
-from venue.views import venue
-from venue.api.venue import venue_api
-from ticket.views import ticket
-from ticket.api.ticket import ticket_api
-
-app.register_blueprint(views)
-app.register_blueprint(auth)
-app.register_blueprint(auth_api)
-app.register_blueprint(venue)
-app.register_blueprint(venue_api)
-app.register_blueprint(show)
-app.register_blueprint(show_api)
-app.register_blueprint(ticket)
-app.register_blueprint(ticket_api)
-
 CORS(app)
 
-from accounts.models import User
 with app.app_context():
     db.create_all()
-    
-with app.app_context():
-    users = User.query.all()
-    for user in users:
-        if user.is_admin == True:
-            print(user)
-            print(user.password)
 
 # Register a callback function that takes whatever object is passed in as the
 # identity when creating JWTs and converts it to a JSON serializable format.
@@ -126,5 +97,32 @@ def create_database(app):
 import tasks
 from tasks.tasks import *
 
+from .views import views
+from accounts.auth import auth
+from accounts.api.auth import auth_api
+from shows.views import show
+from shows.api.shows import show_api
+from venue.views import venue
+from venue.api.venue import venue_api
+from ticket.views import ticket
+from ticket.api.ticket import ticket_api
+from accounts.models import User
+
+app.register_blueprint(views)
+app.register_blueprint(auth)
+app.register_blueprint(auth_api)
+app.register_blueprint(venue)
+app.register_blueprint(venue_api)
+app.register_blueprint(show)
+app.register_blueprint(show_api)
+app.register_blueprint(ticket)
+app.register_blueprint(ticket_api)
+
+
+with app.app_context():
+    users = User.query.all()
+    for user in users:
+        if user.is_admin == True:
+            print(user)
 def create_app():
     return app

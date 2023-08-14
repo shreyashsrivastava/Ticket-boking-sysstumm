@@ -13,8 +13,11 @@
                 <router-link :to="'/editVenue/' + venue.venue_id" v-if="isAdmin">
                   <a class="btn btn-sm btn-warning mx-1">Edit Venue</a>
                 </router-link>
-                <button v-if="isAdmin" class="btn btn-sm btn-danger" @click="deleteVenue(venue.venue_id)">Delete Venue</button>
-                <div><button @click="downloadCSV">Download CSV</button></div>
+                <button v-if="isAdmin" class="btn btn-sm btn-danger" @click="deleteVenue(venue.venue_id)">Delete
+                  Venue</button>
+                <div><button class="btn btn-sm btn-primary" v-if="isAdmin" @click="downloadCSV(venue.venue_id)">Download
+                    CSV</button>
+                </div>
               </div>
             </div>
             <div class="row">
@@ -32,7 +35,8 @@
                         <a v-else class="btn btn-secondary" disabled>Houseful</a>
                       </div>
                       <div class="d-flex align-items-center mt-2">
-                        <button v-if="isAdmin" class="btn btn-sm btn-danger" @click="deleteShow(show.id)">Delete Show</button>
+                        <button v-if="isAdmin" class="btn btn-sm btn-danger" @click="deleteShow(show.id)">Delete
+                          Show</button>
                         <router-link :to="'/editShow/' + show.id" v-if="isAdmin">
                           <a class="btn btn-sm btn-warning mx-1">Edit Show</a>
                         </router-link>
@@ -57,13 +61,9 @@
 
 
 <script>
-// import List from "./List.vue";
-import axios from 'axios';
+
 export default {
   name: "Dashboard",
-  components: {
-    // List,
-  },
   computed: {
     isAdmin() {
       // Retrieve the is_admin value from local storage
@@ -141,6 +141,34 @@ export default {
           console.log(err);
         });
     },
+    downloadCSV: function (venue_id) {
+      fetch("http://127.0.0.1:5000/venue/api/generate_csv/" + venue_id, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+          Authorization: "Bearer " + localStorage.getItem("access_token"),
+        },
+      })
+        .then((response) => {
+          if (!response.ok) {
+            alert("Uh oh! Something went wrong in our backend.");
+          }
+          console.log(response);
+          return response.json();
+        })
+        .then((data) => {
+          if (data.success) {
+            alert(data.success);
+          } else {
+            this.errStatus = true;
+            this.errormsg = data.error;
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    },
   },
   mounted: function () {
     fetch("http://127.0.0.1:5000/show/api/venue", {
@@ -171,27 +199,6 @@ export default {
       .catch((err) => {
         console.log(err);
       });
-    },
-    async downloadCSV() {
-    try {
-      // Trigger the Celery task via Flask API
-      const response = await axios.post('/generate_csv');
-      const csvContent = response.data.csv_content;
-
-      // Create Blob and initiate download
-      const blob = new Blob([csvContent], { type: 'text/csv' });
-      const url = window.URL.createObjectURL(blob);
-
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', 'theater_data.csv');
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    } catch (error) {
-      console.error('Error:', error);
-    }
-    
   },
 };
 </script>
