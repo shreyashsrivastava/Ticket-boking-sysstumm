@@ -125,9 +125,21 @@ app.register_blueprint(ticket_api)
 
 
 with app.app_context():
-    users = User.query.all()
-    for user in users:
-        if user.is_admin == True:
-            print(user)
+    # create an admin user if not exists
+    admin = User.query.filter_by(email="admin@admin.com").first()
+    if not admin:
+        admin = User(
+            email="admin@admin.com",
+            password="admin",
+            name="admin",
+            dob="2000-01-01",
+            phone="1234567890",
+            is_admin=True,
+        )
+        print("admin created")
+        db.session.add(admin)
+        db.session.commit()
+    print("admin exists")
+            
 def create_app():
     return app
