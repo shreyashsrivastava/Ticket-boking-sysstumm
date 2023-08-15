@@ -3,11 +3,9 @@ from flask import Blueprint, jsonify
 from flask_jwt_extended import create_access_token, get_jwt, jwt_required
 from werkzeug.security import generate_password_hash, check_password_hash
 from accounts.models import User
-# from website import db, jwt_redis_blocklist, ACCESS_EXPIRES
-from website import db, ACCESS_EXPIRES, mail
+from website import db
 from webargs.flaskparser import use_args
 from sqlalchemy.exc import IntegrityError
-from flask_mail import Message
 
 
 auth_api = Blueprint("auth_api", __name__, url_prefix="/auth")
@@ -50,8 +48,6 @@ def adminLogin(args):
         if user.is_admin == True:
             if check_password_hash(user.password, args['password']):
                 access_token = create_access_token(identity=user.email)
-                message = Message(subject="Login Alert", recipients=[user.email], body="You have logged in to your account.")
-                mail.send(message)
                 return jsonify({"access_token": access_token, "is_admin": True}), 200
             else:
                 return jsonify({"error": "Incorrect password"}), 400
