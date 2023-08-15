@@ -7,7 +7,7 @@ call .\venv\Scripts\activate
 rem Change to the backend directory and start the server
 cd .\backend\
 start cmd /k python main.py
-start cmd /k celery -A tasks worker --loglevel=info
+start cmd /k celery -A tasks worker --loglevel=info -P solo
 start cmd /k celery -A tasks beat --loglevel=info
 start cmd /k celery -A tasks flower --port=5555
 
