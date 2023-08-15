@@ -1,7 +1,10 @@
-from flask import Blueprint, request, render_template, redirect, url_for
+from shows.api.schema import ShowSchema
+from ticket.models import Ticket
+from flask import Blueprint, request, render_template, jsonify
 from shows.models import Show
-from flask_login import login_user, login_required, logout_user, current_user
+from flask_login import current_user
 from venue.models import Venue
+
 
 views = Blueprint("views", __name__, url_prefix="/")
 

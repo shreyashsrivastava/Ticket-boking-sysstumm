@@ -9,6 +9,9 @@ import "bootstrap";
 Vue.use(Vuelidate);
 Vue.config.productionTip = false;
 
+// Create an event bus
+export const eventBus = new Vue();
+
 new Vue({
   router,
   store,

@@ -35,23 +35,28 @@
           </router-link>
         </li>
       </ul>
-      <form method="POST" class="form-inline my-2 my-lg-0" action="http://localhost:5000/search/">
-        <div class="d-flex align-items-center">
-          <input class="form-control mr-sm-2" name="search" type="search" placeholder="Search" aria-label="Search">
-          &nbsp;<button class="btn btn-primary my-2 my-sm-0" type="submit">Search</button>
-        </div>
-      </form>
+      <div class="d-flex align-items-center">
+        <input v-model="search_query" class="form-control mr-sm-2" name="search" type="search" placeholder="Search"
+          aria-label="Search">
+        &nbsp;<button class="btn btn-primary my-2 my-sm-0" @click="search">Search</button>
+      </div>
     </div>
   </nav>
 </template>
 
 <script>
 import router from "@/router";
+import { eventBus } from "@/main";
 
 export default {
   name: "NavBar",
   props: {
     msg: String,
+  },
+  data() {
+    return {
+      search_query: '',
+    };
   },
   computed: {
     isAdmin() {
@@ -85,60 +90,37 @@ export default {
       router.push("/");
 
     },
-    exportAll: function () {
-      fetch("http://127.0.0.1:5000/api/allcards", {
-        method: "GET",
+    search: function () {
+      fetch("http://127.0.0.1:5000/venue/api/search", {
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
           "Access-Control-Allow-Origin": "*",
           Authorization: "Bearer " + localStorage.getItem("access_token"),
         },
+        body: JSON.stringify({
+          search: this.search_query,
+        }),
       })
         .then((response) => {
           if (!response.ok) {
             alert("Uh oh! Something went wrong in our backend.");
           }
+          console.log(response);
           return response.json();
         })
         .then((data) => {
-          if (data.status) {
-            let cards = data.all_lists;
-            console.log(cards);
-            let csv =
-              "title,content,list_title,deadline,completed,completed_time,\n";
-            cards.forEach((card) => {
-              let li = [];
-              li.push(card.title);
-              li.push(card.content);
-              li.push(card.list_title);
-              li.push(card.deadline);
-              li.push(card.completed);
-              li.push(card.completed_time);
-              csv += li.join(",");
-              csv += "\n";
-            });
-
-            const anchor = document.createElement("a");
-            anchor.href =
-              "data:text/csv;charset=utf-8," + encodeURIComponent(csv);
-            anchor.target = "_blank";
-            anchor.download = "Cards_.csv";
-            anchor.click();
-            // localStorage.setItem("access_token", data.access_token);
-            // localStorage.setItem("username", this.username);
-
-            this.lists = data.lists;
-            // console.log(data.cards[0]["title"]);
-
-            // router.push("/");
+          if (data) {
+            eventBus.$emit("search-results", data);
           } else {
             this.errStatus = true;
-            this.errormsg = data.msg;
+            this.errormsg = data.error;
           }
         })
         .catch((err) => {
           console.log(err);
         });
+
     },
   },
 };

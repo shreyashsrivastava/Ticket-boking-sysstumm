@@ -61,6 +61,7 @@
 
 
 <script>
+import { eventBus } from "@/main";
 
 export default {
   name: "Dashboard",
@@ -199,6 +200,11 @@ export default {
       .catch((err) => {
         console.log(err);
       });
+  },
+  created() {
+    eventBus.$on("search-results", (data) => {
+      this.venuesData = data; // Update the searchResults with the received data
+    });
   },
 };
 </script>
