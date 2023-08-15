@@ -7,6 +7,7 @@ from flask_jwt_extended import JWTManager
 from flask_cors import CORS
 from datetime import timedelta
 from flask_mail import Mail
+from flask_caching import Cache
 
 db = SQLAlchemy()
 DB_NAME = "project.db"
@@ -29,6 +30,10 @@ app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{DB_NAME}"
 app.config["JWT_SECRET_KEY"] = "my-super-secret-salt-to-create-jwt-keep-this-secret-shh"  # Change this!
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = ACCESS_EXPIRES
 jwt = JWTManager(app)
+
+app.config['CACHE_TYPE'] = 'redis'
+app.config['CACHE_REDIS_URL'] = 'redis://localhost:6379/1'
+cache = Cache(app)
 
 # Callback function to check if a JWT exists in the redis blocklist
 @jwt.token_in_blocklist_loader

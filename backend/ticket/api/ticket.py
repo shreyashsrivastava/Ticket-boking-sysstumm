@@ -7,7 +7,7 @@ from webargs.flaskparser import use_args
 from sqlalchemy.exc import IntegrityError
 from flask_jwt_extended import current_user
 from flask import Blueprint, jsonify
-from website import db
+from website import db, cache
 from celery.result import AsyncResult
 from tasks import celery_app
 # from tasks.tasks import send_daily_reminders
@@ -52,6 +52,7 @@ def createTicket(args):
     
 @ticket_api.route("/api", methods=["GET"])
 @jwt_required()
+@cache.cached(timeout=30)
 def getTickets():
     tickets = Ticket.query.filter_by(user=current_user.id).all()
     resp = TicketSchema(many=True).dump(tickets)

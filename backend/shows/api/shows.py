@@ -1,7 +1,7 @@
 from accounts.models import User
 from ticket.models import Ticket
 from venue.models import Venue
-from website import db
+from website import db, cache
 from webargs.flaskparser import use_args
 from sqlalchemy.exc import IntegrityError
 from shows.api.schema import ShowSchema
@@ -63,6 +63,7 @@ def getShow(show_id):
 
 @show_api.route("/api/venue", methods=["GET"])
 @jwt_required()
+@cache.cached(timeout=30)
 def getShowsGroupByVenue():
     venues = Venue.query.all()
     final_response = []
