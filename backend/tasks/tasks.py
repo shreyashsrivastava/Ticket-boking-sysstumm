@@ -1,14 +1,8 @@
-import logging
 from datetime import datetime, time
 from flask_mail import Message
 from website import mail
 from . import celery_app
 from celery.schedules import crontab
-
-# Set up logging
-log_format = '%(asctime)s - %(levelname)s - %(message)s'
-logging.basicConfig(filename='email_log.txt', level=logging.INFO, format=log_format)
-
 
 
 @celery_app.task(name="send_daily_reminders")
@@ -60,9 +54,9 @@ def send_email(email, subject, body, attachment_file_path=None):
                     data=csv_file.read()
                 )
         mail.send(message)
-        logging.info(f"Email sent successfully to {email}")
+        print(f"Email sent successfully to {email}")
     except Exception as e:
-        logging.error(f"Error sending email: {e}", exc_info=True)
+        print(f"Error sending email: {e}", exc_info=True)
 
 @celery_app.on_after_configure.connect
 def setup_periodic_tasks(sender, **kwargs):
