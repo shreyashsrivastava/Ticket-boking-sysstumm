@@ -1,8 +1,13 @@
+import logging
 from datetime import datetime, time
 from flask_mail import Message
 from website import mail
-# from tasks import celery_app
 from . import celery_app
+
+# Set up logging
+log_format = '%(asctime)s - %(levelname)s - %(message)s'
+logging.basicConfig(filename='email_log.txt', level=logging.INFO, format=log_format)
+
 
 @celery_app.task(name="send_daily_reminders")
 def send_daily_reminders():
@@ -20,6 +25,7 @@ def send_daily_reminders():
         body = "Hello! It looks like you haven't visited or booked anything yet. Please consider visiting or booking something today."
     
         # Send reminders to the users
+        # print("Users to remind: ", users_to_remind)
         for user in users_to_remind:
             send_email(user.email, subject, body)
 
@@ -31,31 +37,37 @@ def get_users_to_remind():
     tickets = Ticket.query.all()
     for user in users:
         for ticket in tickets:
-            if ticket.user_id == user.id:
-                users.remove(user)
+            if ticket.user == user.id:
+                try:
+                    users.remove(user)
+                except ValueError:
+                    continue
     return users
 
 def send_email(email, subject, body, attachment_file_path=None):
-    message = Message(subject=subject, recipients=[email], body=body)
-    if attachment_file_path:
-        # Attach the CSV file to the email
-        with open(attachment_file_path, 'rb') as csv_file:
-            message.attach(
-                filename=f'theater_data.csv',
-                content_type='text/csv',
-                data=csv_file.read()
-            )
-    mail.send(message)
+    try:
+        message = Message(subject=subject, recipients=[email], body=body)
+        if attachment_file_path:
+            # Attach the CSV file to the email
+            with open(attachment_file_path, 'rb') as csv_file:
+                message.attach(
+                    filename=f'theater_data.csv',
+                    content_type='text/csv',
+                    data=csv_file.read()
+                )
+        mail.send(message)
+        logging.info(f"Email sent successfully to {email}")
+    except Exception as e:
+        logging.error(f"Error sending email: {e}", exc_info=True)
 
 
 @celery_app.task
 def generate_csv_task(venue_id):
-    csv_content = generate_csv(venue_id)
-    with open('theater_data.csv', 'w') as csv_file:
-        csv_file.write(csv_content)
+    csv_file_path = generate_csv(venue_id)
     admin_users = get_admin_users()
     for user in admin_users:
-        send_email(user.email, "Theater Data", "Here is the data for the theater.", attachment_file_path="theater_data.csv")
+        send_email(user.email, "Theater Data", "Here is the data for the theater.", attachment_file_path=csv_file_path)
+    delete_csv_file(csv_file_path)
         
 def get_admin_users():
     from accounts.models import User
@@ -63,19 +75,43 @@ def get_admin_users():
     return User.query.filter_by(is_admin=True).all()
     
 def generate_csv(venue_id):
-    import sqlite3
-        
-    conn = sqlite3.connect('project.db')
-    cursor = conn.cursor()
+    import csv
+    from shows.models import Show
+    from ticket.models import Ticket
+    
+    data = Show.query.filter_by(venue_id=venue_id).all()
+    csv_file_path = 'shows_data.csv'
 
-    cursor.execute(f'SELECT show.* FROM show where show.venue_id = {venue_id}')
-    data = cursor.fetchall()
-
-    conn.close()
-
+    csv_header = ['ID', 'Name', 'Rating', 'Tag', 'Ticket Price', 'Updated Price', 'Date', 'Number of tickets sold']
+    
+    # Prepare the CSV data rows
     csv_data = []
-    csv_data.append([description[0] for description in cursor.description])
-    csv_data.extend(data)
+    for show in data:
+        tickets_count = len(Ticket.query.filter_by(show=show.id).all())
+        csv_data.append([
+            show.id,
+            show.name,
+            show.rating,
+            show.tag,
+            show.ticket_price,
+            show.updated_price,
+            show.date.strftime('%Y-%m-%d'),  # Format the date as 'YYYY-MM-DD'
+            tickets_count
+        ])
+        
+    # Write the data to the CSV file
+    with open(csv_file_path, mode='w', newline='') as csv_file:
+        writer = csv.writer(csv_file)
+        writer.writerow(csv_header)
+        writer.writerows(csv_data)
+    
+    return csv_file_path
 
-    csv_content = '\n'.join([','.join(map(str, row)) for row in csv_data])
-    return csv_content
+def delete_csv_file(csv_file_path):
+    import os
+    try:
+        # Delete the CSV file
+        os.remove(csv_file_path)
+        print(f"CSV file '{csv_file_path}' has been deleted.")
+    except OSError as e:
+        print(f"Error deleting CSV file: {e}")
